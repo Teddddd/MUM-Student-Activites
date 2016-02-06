@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+	
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/mum"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="Teddyyoo@8"></property>
+	</bean>
+	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="hibernateProperties" ref="hibernateProperties"></property>
+		<property name="packagesToScan" value="EAProject">
+			
+		</property>
+	</bean>
+	
+	
+	<bean id="hibernateProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="connection.pool.size">true</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- <prop key="hibernate.current_session_context_class">thread</prop> -->
+			</props>
+		</property>
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="txManager"  proxy-target-class="true"/>
+	
+	<bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<mvc:annotation-driven />
+	<context:component-scan  base-package="EAProject.MUM_Student_Activities.controllers"/>
+	<!-- base-package="EAProject.MumStudentActivites.controllers -->
+	
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+		
+    <!-- Lets us find resources (.html etc) through the default servlet -->
+    <mvc:default-servlet-handler/> 
+
+    <!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+    up static resources in the ${webappRoot}/resources/ directory -->
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+	
+	
+	<!-- DAO BEANS-->
+	<bean id="adminDao" class="EAProject.MUM_Student_Activities.daoimpl.AdminDAOImpl">
+		<property name="sf" ref="sessionFactory" />
+	</bean>
+	<bean id="announcmentDao" class="EAProject.MUM_Student_Activities.daoimpl.AnnouncmentDAOImpl">
+		<property name="sf" ref="sessionFactory" />
+	</bean>
+	<bean id="eventAdminDao" class="EAProject.MUM_Student_Activities.daoimpl.EventAdminDAOImpl">
+		<property name="sf" ref="sessionFactory" />
+	</bean>
+	<bean id="eventUserDao" class="EAProject.MUM_Student_Activities.daoimpl.EventUserDAOImpl">
+		<property name="sf" ref="sessionFactory" />
+	</bean>
+	<bean id="userDao" class="EAProject.MUM_Student_Activities.daoimpl.UserDAOImpl">
+		<property name="sf" ref="sessionFactory" />
+	</bean>
+	
+	<!-- Service Beans -->
+	
+	<bean id="adminAccountService"
+		class="EAProject.MUM_Student_Activities.serviceimpl.AdminAccountServiceImpl">
+		<constructor-arg ref="adminDao" />
+
+
+	</bean>
+	<bean id="announcmentService"
+		class="EAProject.MUM_Student_Activities.serviceimpl.AnnouncmentServiceImpl">
+		<constructor-arg ref="announcmentDao" />
+
+
+	</bean>
+	<bean id="commentService" class="EAProject.MUM_Student_Activities.serviceimpl.CommentServiceImpl">
+		<constructor-arg index="1" ref="eventAdminDao" />
+		<constructor-arg index="0" ref="eventUserDao" />
+		<constructor-arg index="2" ref="userDao" />
+
+	</bean>
+	<bean id="eventService" class="EAProject.MUM_Student_Activities.serviceimpl.EventServiceImpl">
+		<constructor-arg ref="eventAdminDao" />
+
+
+	</bean>
+	<bean id="userAccountService"
+		class="EAProject.MUM_Student_Activities.serviceimpl.UserAccountServiceImpl">
+		<constructor-arg ref="userDao" />
+
+	</bean>
+	
+</beans>
